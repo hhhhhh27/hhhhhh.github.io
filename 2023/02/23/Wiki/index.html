@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/faceicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/faceicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="搭完博客后就准备好好记录下Wiki堆的过程，第一题就献给UAF，不同版本glibc的小有差别，后续再更新。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Wiki">
+<meta property="og:url" content="http://example.com/2023/02/23/Wiki/index.html">
+<meta property="og:site_name" content="1903">
+<meta property="og:description" content="搭完博客后就准备好好记录下Wiki堆的过程，第一题就献给UAF，不同版本glibc的小有差别，后续再更新。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-02-23T10:06:00.000Z">
+<meta property="article:modified_time" content="2023-02-23T14:10:15.272Z">
+<meta property="article:author" content="hhhhhh_">
+<meta property="article:tag" content="-PWN">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2023/02/23/Wiki/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Wiki | 1903</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">1903</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/02/23/Wiki/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="hhhhhh_">
+      <meta itemprop="description" content="想去北方看看">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="1903">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Wiki
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-02-23 18:06:00 / 修改时间：22:10:15" itemprop="dateCreated datePublished" datetime="2023-02-23T18:06:00+08:00">2023-02-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Wiki/" itemprop="url" rel="index"><span itemprop="name">-Wiki</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>搭完博客后就准备好好记录下Wiki堆的过程，第一题就献给UAF，不同版本glibc的小有差别，后续再更新。</p>
+<span id="more"></span>
+
+<h2 id="UAF"><a href="#UAF" class="headerlink" title="UAF"></a>UAF</h2><p>​	所谓UAF即， Use After Free，或者说是悬挂指针（dangling pointer）更合适。</p>
+<h3 id="HITCON-training-lab10-hacknote"><a href="#HITCON-training-lab10-hacknote" class="headerlink" title="HITCON-training lab10 hacknote"></a>HITCON-training lab10 hacknote</h3><p>​	属于是老题重做了，一个无edit的常规堆题。通过这题复习下IDA的使用。</p>
+<h4 id="IDA分析"><a href="#IDA分析" class="headerlink" title="IDA分析"></a>IDA分析</h4><h5 id="add"><a href="#add" class="headerlink" title="add"></a>add</h5><p>​	程序申请了0x8大小的chunk来存储信息，IDA修复结构体，前0x4字节存放print函数指针，后0x4字节存放指向chunk的指针，因为无edit功能，也没必要存储size。</p>
+<h5 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h5><p>​	漏洞出在这，free完堆块，并未清空指针。</p>
+<h5 id="print"><a href="#print" class="headerlink" title="print"></a>print</h5><p>​	通过存储指针的方式来调用也是挺怪的，应该是为了更好地演示UAF，相当于给了可控指针，并且方便调用。</p>
+<h5 id="magic"><a href="#magic" class="headerlink" title="magic"></a>magic</h5><p>​	存在后门函数。</p>
+<h4 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h4><p>​	先add两个0x10的堆块，这样就会得到两个0x8的chunk和0x10的chunk，将其free后，在0x8的链表中会有2个chunk，此时再add一个0x8的堆块，那么glibc分配给我们的就是0x8链表中的这两个chunk（而这也是利用的关键，因为这两个chunk都是原先程序用来存放指针的chunk，而UAF的指针未清空使我们可以通过notelist数组内存放的chunk指针来索引并正常调用print功能），我们只需在这次add中往属于用户的那个0x8大小的chunk写入magic函数的地址（相当于覆盖了两个其中之一的0x8大小chunk的print_something函数指针，取决于free的顺序），再去调用print功能即可拿到flag。</p>
+<h2 id="Overlapping"><a href="#Overlapping" class="headerlink" title="Overlapping"></a>Overlapping</h2><p>​	堆叠一直不太会。</p>
+<h3 id="hitcontraning-lab13"><a href="#hitcontraning-lab13" class="headerlink" title="hitcontraning lab13"></a>hitcontraning lab13</h3><p>​	功能齐全的堆题，盲猜只有一个Off by one就没了。</p>
+<h4 id="IDA分析-1"><a href="#IDA分析-1" class="headerlink" title="IDA分析"></a>IDA分析</h4><h5 id="add-1"><a href="#add-1" class="headerlink" title="add"></a>add</h5><p>​	和上题相同的是，同样申请了一个0x10的chunk作结构体，不过用来存size和ptr。</p>
+<h5 id="edit"><a href="#edit" class="headerlink" title="edit"></a>edit</h5><p>​	存在off by one。</p>
+<h5 id="delete-1"><a href="#delete-1" class="headerlink" title="delete"></a>delete</h5><p>​	正常释放操作。</p>
+<h5 id="print-1"><a href="#print-1" class="headerlink" title="print"></a>print</h5><p>​	打印size和content。</p>
+<h4 id="利用-1"><a href="#利用-1" class="headerlink" title="利用"></a>利用</h4><p>​	checksec一下，保护未全开，got表可写，最直接的打法是改free_got表为system，再free一个有&#x2F;bin&#x2F;sh的chunk（本题确实如此）。</p>
+<p>​	先add两个堆块，size分别为0x18、0x10（之所以为0x18是为了后面的off by one），从而得到4个0x20的chunk，并且第二、三个chunk存在空间复用。向后合并构造堆叠：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">edit(0, &quot;/bin/sh\x00&quot; + &quot;a&quot; * 0x10 + &quot;\x41&quot;)</span><br><span class="line">delete(1)</span><br></pre></td></tr></table></figure>
+
+<p>​	堆叠部分的内存是第四个chunk（即原先属于用户的chunk），这里在delete（1）时，free了两次，导致堆叠部分的内存分别出现在了0x20和0x40的链表中，在后面我们申请0x30的堆块去拿回内存时，0x20的结构体就会任然从链表中取，取出的0x40的chunk效果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0x10：mem</span><br><span class="line">0x20：mem</span><br><span class="line">0x30：mem	|（堆叠部分）	| 用作结构体</span><br><span class="line">0x40：mem	|（堆叠部分）	| 用作结构体</span><br></pre></td></tr></table></figure>
+
+<p>​	再次edit 0x40的chunk即可修改0x20的结构体：（这里在add时就直接写入，效果一样）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">create(0x30, p64(0) * 4 + p64(0x30) + p64(heap.got[&#x27;free&#x27;]))</span><br></pre></td></tr></table></figure>
+
+<p>​	将指针指向free_got，再print时即可泄露出free的真实地址，再计算system函数的地址并通过edit将其写入free_got，然后free有&#x2F;bin&#x2F;sh的chunk0即可get shell。</p>
+<h2 id="off-by-one"><a href="#off-by-one" class="headerlink" title="off by one"></a>off by one</h2><h3 id="Asis-CTF-2016-b00ks"><a href="#Asis-CTF-2016-b00ks" class="headerlink" title="Asis CTF 2016 b00ks"></a>Asis CTF 2016 b00ks</h3><p>​	IDA修复先把我整晕了，这题用一个0x20的结构体来存储book，有id、name、description和size四个属性，而在data段上有个二级指针，指向bss段上存储book的指针数组（暂时不知道是为了什么），</p>
+<p>未完待续…</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/PWN/" rel="tag"># -PWN</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/22/hello-world/" rel="prev" title="Hello World">
+      <i class="fa fa-chevron-left"></i> Hello World
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#UAF"><span class="nav-number">1.</span> <span class="nav-text">UAF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HITCON-training-lab10-hacknote"><span class="nav-number">1.1.</span> <span class="nav-text">HITCON-training lab10 hacknote</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IDA%E5%88%86%E6%9E%90"><span class="nav-number">1.1.1.</span> <span class="nav-text">IDA分析</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#add"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">add</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#delete"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">delete</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#print"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">print</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#magic"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">magic</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8"><span class="nav-number">1.1.2.</span> <span class="nav-text">利用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Overlapping"><span class="nav-number">2.</span> <span class="nav-text">Overlapping</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hitcontraning-lab13"><span class="nav-number">2.1.</span> <span class="nav-text">hitcontraning lab13</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IDA%E5%88%86%E6%9E%90-1"><span class="nav-number">2.1.1.</span> <span class="nav-text">IDA分析</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#add-1"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">add</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#edit"><span class="nav-number">2.1.1.2.</span> <span class="nav-text">edit</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#delete-1"><span class="nav-number">2.1.1.3.</span> <span class="nav-text">delete</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#print-1"><span class="nav-number">2.1.1.4.</span> <span class="nav-text">print</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8-1"><span class="nav-number">2.1.2.</span> <span class="nav-text">利用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#off-by-one"><span class="nav-number">3.</span> <span class="nav-text">off by one</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Asis-CTF-2016-b00ks"><span class="nav-number">3.1.</span> <span class="nav-text">Asis CTF 2016 b00ks</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hhhhhh_"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">hhhhhh_</p>
+  <div class="site-description" itemprop="description">想去北方看看</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hhhhhh_</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
