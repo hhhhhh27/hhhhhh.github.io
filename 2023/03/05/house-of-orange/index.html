@@ -27,27 +27,27 @@
 <meta property="og:site_name" content="1903">
 <meta property="og:description" content="​	这一周跟着raycp师傅的博客学了学IO FILE入门相关的知识，记录下house of orange的解题过程（跟比赛中的东东相比有些年代了…）">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677924841443.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677925005518.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677928090686.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677929821460.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677981605004.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677980673650.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677982121546.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677984956101.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677985104606.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677986238443.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677988358140.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677988419641.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677991259559.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677994247278.png">
-<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677996300792.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677924841443.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677925005518.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677928090686.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677929821460.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677981605004.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677980673650.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677982121546.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677984956101.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677985104606.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677986238443.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677988358140.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677988419641.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677991259559.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677994247278.png">
+<meta property="og:image" content="http://example.com/2023/03/05/house-of-orange/1677996300792.png">
 <meta property="article:published_time" content="2023-03-05T08:34:23.000Z">
 <meta property="article:modified_time" content="2023-03-05T09:49:11.286Z">
 <meta property="article:author" content="hhhhhh_">
 <meta property="article:tag" content="-PWN">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2023/03/05/house-of-orange/.com//1677924841443.png">
+<meta name="twitter:image" content="http://example.com/2023/03/05/house-of-orange/1677924841443.png">
 
 <link rel="canonical" href="http://example.com/2023/03/05/house-of-orange/">
 
@@ -250,9 +250,9 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#leak libc address</span><br><span class="line">add(0x2000000)</span><br><span class="line">libc.address = int(sh.recv(14), 16) + 0x2001000 - 0x10</span><br><span class="line">print(hex(libc.address))</span><br></pre></td></tr></table></figure>
 
 <p>malloc前</p>
-<p><img src=".com//1677924841443.png" alt="1677924841443"></p>
+<p><img src="1677924841443.png" alt="1677924841443"></p>
 <p>malloc后：</p>
-<p><img src=".com//1677925005518.png" alt="1677925005518"></p>
+<p><img src="1677925005518.png" alt="1677925005518"></p>
 <p>​	mmap得到的内存空间紧贴libc，其中多出来的0x1000看博客说是因为对齐。</p>
 <p>​	其中unsorted bin的链表头在main arena中偏移为88的位置（x64）；</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#find function address</span><br><span class="line">system = libc.sym[&#x27;system&#x27;] + 0x10</span><br><span class="line">_IO_list_all = libc.sym[&#x27;_IO_list_all&#x27;]</span><br><span class="line">main_arena = libc.sym[&#x27;__malloc_hook&#x27;] + 0x10</span><br><span class="line">unsorted_bin_head = main_arena + 88</span><br></pre></td></tr></table></figure>
@@ -268,9 +268,9 @@
 <p>_IO_flush_all_lockp( )函数，会遍历链表所有结构体，并依次刷新它们的输出缓冲区</p>
 </blockquote>
 <p>借用stdin，可以看到chain字段在0x68的位置：</p>
-<p><img src=".com//1677928090686.png" alt="1677928090686"></p>
+<p><img src="1677928090686.png" alt="1677928090686"></p>
 <p>再看main_arena：</p>
-<p><img src=".com//1677929821460.png" alt="1677929821460"></p>
+<p><img src="1677929821460.png" alt="1677929821460"></p>
 <p>​	unsorted bin head后0x68处其实为smallbin中size为0x60的链表头的bk指针，指向链表中末项，所以只需劫持该bk指针指向我们伪造的IO FILE结构体即可；</p>
 <blockquote>
 <p>只需在一个处于unsorted bin的chunk内伪造IO FILE结构体，并修改size为0x61即可：</p>
@@ -292,14 +292,14 @@
 
 <p>（注释部分是看博客的exp，不知道作用是啥，不用也能通）	</p>
 <p>在delete之后，malloc之前停下来：</p>
-<p><img src=".com//1677981605004.png" alt="1677981605004"></p>
+<p><img src="1677981605004.png" alt="1677981605004"></p>
 <p>​	此时 top chunk依然是页对齐的（0x210的chunk与top chunk会先合并）</p>
 <p>再malloc一个大于0x1000的堆块，old top chunk就会进入unsorted bin：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#let old top chunk into unsorted bin</span><br><span class="line">add(0x1000)</span><br></pre></td></tr></table></figure>
 
-<p><img src=".com//1677980673650.png" alt="1677980673650"></p>
+<p><img src="1677980673650.png" alt="1677980673650"></p>
 <p>​	但size却少了0x20，被切割出了一个0x20的chunk，可能与libc的机制有关（猜测是因为一些检查需要next chunk的prev_inuse位和prev_size字段）</p>
-<p><img src=".com//1677982121546.png" alt="1677982121546"></p>
+<p><img src="1677982121546.png" alt="1677982121546"></p>
 <p>​	0x1010的chunk只是为了得到unsorted bin，所以直接free（会与新的top chunk合并 [从它那切割来的] ）</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">delete()</span><br></pre></td></tr></table></figure>
 
@@ -313,21 +313,21 @@
 
 <p>​	unsorted bin明明是依据bk遍历（逆序），为何结果看到的是0x210的chunk入smallbin，而old top chunk依旧在unsorted bin [彷佛感觉是0x210的chunk无法满足0x220的请求而入smallbin，然后从old top chunk切割]</p>
 <h6 id="实际调试："><a href="#实际调试：" class="headerlink" title="实际调试："></a>实际调试：</h6><p>​	unsorted bin遍历时第一个拿到的确实是old top chunk（last chunk），但它并不直接满足nb需求，所以被放入了large bin中：</p>
-<p><img src=".com//1677984956101.png" alt="1677984956101"></p>
+<p><img src="1677984956101.png" alt="1677984956101"></p>
 <p>第一次遍历的chunk最终取出后，继续下一个：</p>
-<p><img src=".com//1677985104606.png" alt="1677985104606"></p>
+<p><img src="1677985104606.png" alt="1677985104606"></p>
 <p>（之前有理解误区，所以贴下）</p>
 <p>对smallbin的入链同理，这里直接跳到unsorted bin遍历结束：</p>
 <p>​	由于我们申请的是smallbin大小的chunk，并不会先去largebin中寻找，而是跳转至++idx，根据bitmap查询大于nb请求的bin中是否有满足需求的chunk；（本题中largebin的old top chunk满足需求）</p>
 <p>找到合适的chunk后：</p>
-<p><img src=".com//1677986238443.png" alt="1677986238443"></p>
+<p><img src="1677986238443.png" alt="1677986238443"></p>
 <p>暂时略过chunk切割的部分，直接到链入unsorted bin：</p>
-<p><img src=".com//1677988358140.png" alt="1677988358140"></p>
+<p><img src="1677988358140.png" alt="1677988358140"></p>
 <p>最终效果就如预想一般：</p>
-<p><img src=".com//1677988419641.png" alt="1677988419641"></p>
+<p><img src="1677988419641.png" alt="1677988419641"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">delete()</span><br><span class="line">add(0x200)</span><br></pre></td></tr></table></figure>
 
-<p><img src=".com//1677991259559.png" alt="1677991259559"></p>
+<p><img src="1677991259559.png" alt="1677991259559"></p>
 <h6 id="开始利用："><a href="#开始利用：" class="headerlink" title="开始利用："></a>开始利用：</h6><p>（初看时有点懵）大体可以分成3块：</p>
 <ol>
 <li><p>堆溢出时需要跨过中间的0x220的chunk；</p>
@@ -356,7 +356,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> while ((victim = unsorted_chunks(av)-&gt;bk) != unsorted_chunks(av)) &#123;</span><br><span class="line">            bck = victim-&gt;bk;</span><br><span class="line">            if (__builtin_expect(chunksize_nomask(victim) &lt;= 2 * SIZE_SZ, 0) ||</span><br><span class="line">                __builtin_expect(chunksize_nomask(victim) &gt; av-&gt;system_mem, 0))</span><br><span class="line">                malloc_printerr(check_action, &quot;malloc(): memory corruption&quot;,</span><br><span class="line">                                chunk2mem(victim), av);</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 <p>调试下：</p>
-<p><img src=".com//1677994247278.png" alt="1677994247278"></p>
+<p><img src="1677994247278.png" alt="1677994247278"></p>
 <ol>
 <li><p>接3：正是利用了这一点，调用了malloc_printerr()-&gt;abort()-&gt;_IO_flush_all_lockp()；</p>
 <p>（或许为此才需要unsorted bin中有2个chunk？）</p>
@@ -380,7 +380,7 @@
 </blockquote>
 <p>除此之外，还有一个vtable指针需要布置，以及vtable中_IO_OVERFLOW的指针（第4个）修改为system即可；</p>
 <p>借用下stdin：</p>
-<p><img src=".com//1677996300792.png" alt="1677996300792"></p>
+<p><img src="1677996300792.png" alt="1677996300792"></p>
 <p>布置完后，malloc才是攻击的开始：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sleep(0.5)</span><br><span class="line">add(0xb00)</span><br></pre></td></tr></table></figure>
 
